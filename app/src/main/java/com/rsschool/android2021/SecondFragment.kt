@@ -1,12 +1,15 @@
 package com.rsschool.android2021
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
+import kotlin.random.Random
 
 class SecondFragment : Fragment() {
 
@@ -21,6 +24,17 @@ class SecondFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_second, container, false)
     }
 
+    private var listener: ActionListener? = null
+
+    interface ActionListener {
+        fun onBackButtonPressed(previousNumber: Int)
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        listener = context as ActionListener
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         result = view.findViewById(R.id.result)
@@ -29,16 +43,24 @@ class SecondFragment : Fragment() {
         val min = arguments?.getInt(MIN_VALUE_KEY) ?: 0
         val max = arguments?.getInt(MAX_VALUE_KEY) ?: 0
 
-        result?.text = generate(min, max).toString()
+        val generatedValue = generate(min, max)
+        result?.text = generatedValue.toString()
 
-        backButton?.setOnClickListener {
-            // TODO: implement back
+        fun backPressed() {
+            listener?.onBackButtonPressed(generatedValue)
+        }
+
+        backButton?.setOnClickListener { backPressed() }
+
+        // https://developer.android.com/guide/navigation/navigation-custom-back#implement_custom_back_navigation
+        requireActivity().onBackPressedDispatcher.addCallback(this) {
+            backPressed()
         }
     }
 
     private fun generate(min: Int, max: Int): Int {
-        // TODO: generate random number
-        return 0
+        // the upper bound is exclusive, that's why 'max + 1'
+        return Random.nextInt(min, max + 1)
     }
 
     companion object {
@@ -48,7 +70,10 @@ class SecondFragment : Fragment() {
             val fragment = SecondFragment()
             val args = Bundle()
 
-            // TODO: implement adding arguments
+            args.putInt(MIN_VALUE_KEY, min)
+            args.putInt(MAX_VALUE_KEY, max)
+
+            fragment.arguments = args
 
             return fragment
         }
