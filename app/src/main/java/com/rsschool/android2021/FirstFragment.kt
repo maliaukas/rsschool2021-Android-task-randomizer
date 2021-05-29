@@ -15,6 +15,8 @@ class FirstFragment : Fragment() {
 
     private var generateButton: Button? = null
     private var previousResult: TextView? = null
+    private var min: EditText? = null
+    private var max: EditText? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,36 +42,50 @@ class FirstFragment : Fragment() {
 
         previousResult = view.findViewById(R.id.previous_result)
         generateButton = view.findViewById(R.id.generate)
+        min = view.findViewById(R.id.min_value)
+        max = view.findViewById(R.id.max_value)
 
         val result = arguments?.getInt(PREVIOUS_RESULT_KEY)
         previousResult?.text = String.format(getString(R.string.previous_result), result)
 
         generateButton?.setOnClickListener {
-            val minStr = view.findViewById<EditText>(R.id.min_value).text.toString()
-            val maxStr = view.findViewById<EditText>(R.id.max_value).text.toString()
+            val minStr = min?.text.toString()
+            val maxStr = max?.text.toString()
 
             if (minStr.isBlank() || maxStr.isBlank()) {
                 showSnackBar(view, "Please fill all the fields!")
                 return@setOnClickListener
             }
 
-            val min: Int
-            val max: Int
+            val minValue: Long? = minStr.toLongOrNull()
+            val maxValue: Long? = maxStr.toLongOrNull()
 
-            try {
-                min = minStr.toInt()
-                max = maxStr.toInt()
-            } catch (e: NumberFormatException) {
-                showSnackBar(view, "Entered values are too big!")
+            if (minValue == null) {
+                showSnackBar(view, "Cannot parse min value!")
                 return@setOnClickListener
             }
 
-            if (min > max) {
+            if (maxValue == null) {
+                showSnackBar(view, "Cannot parse max value!")
+                return@setOnClickListener
+            }
+
+            if (minValue > Int.MAX_VALUE) {
+                showSnackBar(view, "Entered min value is too big!")
+                return@setOnClickListener
+            }
+
+            if (maxValue > Int.MAX_VALUE) {
+                showSnackBar(view, "Entered max value is too big!")
+                return@setOnClickListener
+            }
+
+            if (minValue > maxValue) {
                 showSnackBar(view, "Max shouldn't be less than min!")
                 return@setOnClickListener
             }
 
-            listener?.onGenerateButtonPressed(min, max)
+            listener?.onGenerateButtonPressed(minValue.toInt(), maxValue.toInt())
         }
     }
 

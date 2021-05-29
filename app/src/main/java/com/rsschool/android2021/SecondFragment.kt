@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import kotlin.random.Random
+import kotlin.random.nextInt
 
 class SecondFragment : Fragment() {
 
@@ -59,8 +60,7 @@ class SecondFragment : Fragment() {
     }
 
     private fun generate(min: Int, max: Int): Int {
-        // the upper bound is exclusive, that's why 'max + 1'
-        return Random.nextInt(min, max + 1)
+        return Random.nextInt(min..max)
     }
 
     companion object {
